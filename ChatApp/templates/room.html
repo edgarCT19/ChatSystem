@@ -1,0 +1,390 @@
+{% extends 'base.html' %}
+
+{% block title %}Home{% endblock %}
+
+{% block content %}
+{% if user.is_authenticated %}
+
+<style>
+  #notification {
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    padding: 10px;
+    background-color: #4CAF50;
+    color: white;
+    border-radius: 5px;
+    display: none;
+  }
+
+  #chatbox {
+    max-height: 450px; /* Establece una altura máxima para el chatbox */
+    overflow-y: auto; /* Permite que el contenido se desplace verticalmente si excede la altura máxima */
+    padding: 10px; /* Agrega un espacio interno para que el contenido no esté pegado a los bordes */
+  }
+
+  .chat-message {
+    margin-bottom: 10px;
+    padding: 8px;
+    border-radius: 8px;
+  }
+
+  .chat-message.text-left {
+    background-color: #DDE4E8; /* Color de fondo para los mensajes de izquierda */
+    text-align: left;
+    margin: 8px 60% 8px 8px; /* Margen superior, derecho, inferior, izquierdo */
+    padding: 10px;
+    border-radius: 20px; /* Bordes redondeados */
+  }
+  
+  .chat-message.text-right {
+    background-color: #add8e6; /* Color de fondo para los mensajes de derecha */
+    color: #000; /* Color del texto */
+    text-align: right;
+    margin: 8px 8px 8px 60%; /* Margen superior, derecho, inferior, izquierdo */
+    padding: 10px;
+    border-radius: 20px; /* Bordes redondeados */
+  }
+
+  .chat-message.text-center.union {
+     /* Color de fondo para los mensajes de derecha */
+    color: #0bdfca; /* Color del texto */
+    text-align: center;
+    margin: 8px auto; /* Margen superior e inferior 8px, y margen izquierdo y derecho automáticos */
+    padding: 10px;
+    border-radius: 20px; /* Bordes redondeados */
+    display: block; /* Para ocupar todo el ancho disponible */
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* Tipo de fuente diferente */
+    font-style: italic;
+}
+
+.chat-message.text-center.salida {
+  /* Color de fondo para los mensajes de derecha */
+  color: #ea0c0c; /* Color del texto */
+  text-align: center;
+  margin: 8px auto; /* Margen superior e inferior 8px, y margen izquierdo y derecho automáticos */
+  padding: 10px;
+  border-radius: 20px; /* Bordes redondeados */
+  display: block; /* Para ocupar todo el ancho disponible */
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* Tipo de fuente diferente */
+  font-style: italic;
+}
+
+  .chat-event {
+    font-style: italic;
+    margin-top: 10px;
+  }
+</style>
+
+<div class="container">
+  <div class="row d-flex justify-content-center">
+    <div class="col-12">
+      <div class="alert alert-secondary d-flex justify-content-between" role="alert">
+        <h5>Sala de chat: {{room_name}}</h5>
+        <a href="/accounts/login/">
+          <button type="button" class="btn btn-danger">Salir <i class="bi bi-box-arrow-left"></i></button>
+          <!--<button type="button" class="btn btn-warning leave-chat-button">Salir del chat <i class="bi bi-chat-dots"></i></button>-->
+        </a>
+      </div>
+      <div id="notification"></div>
+      <div style="height: 300px;  background-color: transparent;" >
+        <form onsubmit="return false;" class="mt-auto">
+          <div class="form-group">
+            <div class="" id="chatbox" style="padding: 4px 2px;">
+            <b></b>
+          </div>
+          <br/>
+          </div>
+          <div class="form-group" style="display: flex; align-items: center; cursor: pointer;">
+            <div class="dropdown">
+              <button class="btn btn-secondary rounded-circle" type="button" required style="margin-right: 5px;" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
+                <i class="bi bi-emoji-smile-fill"></i>
+              </button>
+              <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton" style="max-height: 200px; overflow-y: auto;">
+                <span class="emoji-select" data-emoji="&#x1F604;">&#x1F604;</span> <!-- 😀 -->
+                <span class="emoji-select" data-emoji="&#x1F601;">&#x1F601;</span> <!-- 😁 -->
+                <span class="emoji-select" data-emoji="&#x1F606;">&#x1F606;</span> <!-- 😆 -->
+                <span class="emoji-select" data-emoji="&#x1F605;">&#x1F605;</span> <!-- 😅 -->
+                <span class="emoji-select" data-emoji="&#x1F602;">&#x1F602;</span> <!-- 😂 -->
+                <span class="emoji-select" data-emoji="&#x1F923;">&#x1F923;</span> <!-- 🤣 -->
+                <span class="emoji-select" data-emoji="&#x1F609;">&#x1F609;</span> <!-- 😉 -->
+                <span class="emoji-select" data-emoji="&#x1F60A;">&#x1F60A;</span> <!-- 😊 -->
+                <span class="emoji-select" data-emoji="&#x1F60D;">&#x1F60D;</span> <!-- 😍 -->
+                <span class="emoji-select" data-emoji="&#x1F618;">&#x1F618;</span> <!-- 😘 -->
+                <span class="emoji-select" data-emoji="&#x1F617;">&#x1F617;</span> <!-- 😗 -->
+                <span class="emoji-select" data-emoji="&#x1F61A;">&#x1F61A;</span> <!-- 😚 -->
+                <span class="emoji-select" data-emoji="&#x1F619;">&#x1F619;</span> <!-- 😙 -->
+                <span class="emoji-select" data-emoji="&#x1F60B;">&#x1F60B;</span> <!-- 😋 -->
+                <span class="emoji-select" data-emoji="&#x1F61B;">&#x1F61B;</span> <!-- 😛 -->
+                <span class="emoji-select" data-emoji="&#x1F61C;">&#x1F61C;</span> <!-- 😜 -->
+                <span class="emoji-select" data-emoji="&#x1F61D;">&#x1F61D;</span> <!-- 😝 -->
+                <span class="emoji-select" data-emoji="&#x1F911;">&#x1F911;</span> <!-- 🤑 -->
+                <span class="emoji-select" data-emoji="&#x1F917;">&#x1F917;</span> <!-- 🤗 -->
+                <span class="emoji-select" data-emoji="&#x1F914;">&#x1F914;</span> <!-- 🤔 -->
+                <span class="emoji-select" data-emoji="&#x1F910;">&#x1F910;</span> <!-- 🤐 -->
+                <span class="emoji-select" data-emoji="&#x1F60E;">&#x1F60E;</span> <!-- 😎 -->
+                <span class="emoji-select" data-emoji="&#x1F929;">&#x1F929;</span> <!-- 🤩 -->
+                <span class="emoji-select" data-emoji="&#x1F61F;">&#x1F61F;</span> <!-- 😟 -->
+                <span class="emoji-select" data-emoji="&#x1F626;">&#x1F626;</span> <!-- 😦 -->
+                <span class="emoji-select" data-emoji="&#x1F627;">&#x1F627;</span> <!-- 😧 -->
+                <span class="emoji-select" data-emoji="&#x1F62E;">&#x1F62E;</span> <!-- 😮 -->
+                <span class="emoji-select" data-emoji="&#x1F62F;">&#x1F62F;</span> <!-- 😯 -->
+                <span class="emoji-select" data-emoji="&#x1F632;">&#x1F632;</span> <!-- 😲 -->
+                <span class="emoji-select" data-emoji="&#x1F633;">&#x1F633;</span> <!-- 😳 -->
+                <span class="emoji-select" data-emoji="&#x1F60F;">&#x1F60F;</span> <!-- 😏 -->
+                <span class="emoji-select" data-emoji="&#x1F60C;">&#x1F60C;</span> <!-- 😌 -->
+                <span class="emoji-select" data-emoji="&#x1F971;">&#x1F971;</span> <!-- 🥱 -->
+                <span class="emoji-select" data-emoji="&#x1F60B;">&#x1F60B;</span> <!-- 😋 -->
+                <span class="emoji-select" data-emoji="&#x1F929;">&#x1F929;</span> <!-- 🤩 -->
+                <span class="emoji-select" data-emoji="&#x1F4AA;">&#x1F4AA;</span> <!-- 💪 -->
+                <span class="emoji-select" data-emoji="&#x1F44D;">&#x1F44D;</span> <!-- 👍 -->
+                <span class="emoji-select" data-emoji="&#x1F44E;">&#x1F44E;</span> <!-- 👎 -->
+                <span class="emoji-select" data-emoji="&#x1F600;">&#x1F600;</span> <!-- 😀 -->
+                <span class="emoji-select" data-emoji="&#x1F914;">&#x1F914;</span> <!-- 🤔 -->
+                <span class="emoji-select" data-emoji="&#x1F601;">&#x1F601;</span> <!-- 😁 -->
+                <span class="emoji-select" data-emoji="&#x1F602;">&#x1F602;</span> <!-- 😂 -->
+                <span class="emoji-select" data-emoji="&#x1F603;">&#x1F603;</span> <!-- 😃 -->
+                <span class="emoji-select" data-emoji="&#x1F604;">&#x1F604;</span> <!-- 😄 -->
+                <span class="emoji-select" data-emoji="&#x1F605;">&#x1F605;</span> <!-- 😅 -->
+                <span class="emoji-select" data-emoji="&#x1F606;">&#x1F606;</span> <!-- 😆 -->
+                <span class="emoji-select" data-emoji="&#x1F607;">&#x1F607;</span> <!-- 😇 -->
+                <span class="emoji-select" data-emoji="&#x1F608;">&#x1F608;</span> <!-- 😈 -->
+                <span class="emoji-select" data-emoji="&#x1F609;">&#x1F609;</span> <!-- 😉 -->
+                <span class="emoji-select" data-emoji="&#x1F60A;">&#x1F60A;</span> <!-- 😊 -->
+                <span class="emoji-select" data-emoji="&#x1F60B;">&#x1F60B;</span> <!-- 😋 -->
+                <span class="emoji-select" data-emoji="&#x1F60C;">&#x1F60C;</span> <!-- 😌 -->
+                <span class="emoji-select" data-emoji="&#x1F60D;">&#x1F60D;</span> <!-- 😍 -->
+                <span class="emoji-select" data-emoji="&#x1F60E;">&#x1F60E;</span> <!-- 😎 -->
+                <span class="emoji-select" data-emoji="&#x1F60F;">&#x1F60F;</span> <!-- 😏 -->
+                <span class="emoji-select" data-emoji="&#x1F610;">&#x1F610;</span> <!-- 😐 -->
+                <span class="emoji-select" data-emoji="&#x1F611;">&#x1F611;</span> <!-- 😑 -->
+                <span class="emoji-select" data-emoji="&#x1F912;">&#x1F912;</span> <!-- 🤒 -->
+                <span class="emoji-select" data-emoji="&#x1F913;">&#x1F913;</span> <!-- 🤓 -->
+                <span class="emoji-select" data-emoji="&#x1F914;">&#x1F914;</span> <!-- 🤔 -->
+                <span class="emoji-select" data-emoji="&#x1F915;">&#x1F915;</span> <!-- 🤕 -->
+                <span class="emoji-select" data-emoji="&#x1F916;">&#x1F916;</span> <!-- 🤖 -->
+                <span class="emoji-select" data-emoji="&#x1F917;">&#x1F917;</span> <!-- 🤗 -->
+                <span class="emoji-select" data-emoji="&#x1F918;">&#x1F918;</span> <!-- 🤘 -->
+                <span class="emoji-select" data-emoji="&#x1F919;">&#x1F919;</span> <!-- 🤙 -->
+                <span class="emoji-select" data-emoji="&#x1F91A;">&#x1F91A;</span> <!-- 🤚 -->
+                <span class="emoji-select" data-emoji="&#x1F91B;">&#x1F91B;</span> <!-- 🤛 -->
+                <span class="emoji-select" data-emoji="&#x1F91C;">&#x1F91C;</span> <!-- 🤜 -->
+                <span class="emoji-select" data-emoji="&#x1F91D;">&#x1F91D;</span> <!-- 🤝 -->
+                <span class="emoji-select" data-emoji="&#x1F91E;">&#x1F91E;</span> <!-- 🤞 -->
+                <span class="emoji-select" data-emoji="&#x1F91F;">&#x1F91F;</span> <!-- 🤟 -->
+                <span class="emoji-select" data-emoji="&#x1F920;">&#x1F920;</span> <!-- 🤠 -->
+                <span class="emoji-select" data-emoji="&#x1F921;">&#x1F921;</span> <!-- 🤡 -->
+                <span class="emoji-select" data-emoji="&#x1F922;">&#x1F922;</span> <!-- 🤢 -->
+                <span class="emoji-select" data-emoji="&#x1F923;">&#x1F923;</span> <!-- 🤣 -->
+                <span class="emoji-select" data-emoji="&#x1F924;">&#x1F924;</span> <!-- 🤤 -->
+                <span class="emoji-select" data-emoji="&#x1F925;">&#x1F925;</span> <!-- 🤥 -->
+                <span class="emoji-select" data-emoji="&#x1F926;">&#x1F926;</span> <!-- 🤦 -->
+                <span class="emoji-select" data-emoji="&#x1F927;">&#x1F927;</span> <!-- 🤧 -->
+                <span class="emoji-select" data-emoji="&#x1F928;">&#x1F928;</span> <!-- 🤨 -->
+                <span class="emoji-select" data-emoji="&#x1F92A;">&#x1F92A;</span> <!-- 🤪 -->
+                <span class="emoji-select" data-emoji="&#x1F92B;">&#x1F92B;</span> <!-- 🤫 -->
+                <span class="emoji-select" data-emoji="&#x1F92C;">&#x1F92C;</span> <!-- 🤬 -->
+                <span class="emoji-select" data-emoji="&#x1F92D;">&#x1F92D;</span> <!-- 🤭 -->
+                <span class="emoji-select" data-emoji="&#x1F92E;">&#x1F92E;</span> <!-- 🤮 -->
+                <span class="emoji-select" data-emoji="&#x1F92F;">&#x1F92F;</span> <!-- 🤯 -->
+                <span class="emoji-select" data-emoji="&#x1F930;">&#x1F930;</span> <!-- 🤰 -->
+                <span class="emoji-select" data-emoji="&#x1F931;">&#x1F931;</span> <!-- 🤱 -->
+                <span class="emoji-select" data-emoji="&#x1F932;">&#x1F932;</span> <!-- 🤲 -->
+                <span class="emoji-select" data-emoji="&#x1F933;">&#x1F933;</span> <!-- 🤳 -->
+                <span class="emoji-select" data-emoji="&#x1F934;">&#x1F934;</span> <!-- 🤴 -->
+                <span class="emoji-select" data-emoji="&#x1F935;">&#x1F935;</span> <!-- 🤵 -->
+                <span class="emoji-select" data-emoji="&#x1F936;">&#x1F936;</span> <!-- 🤶 -->
+                <span class="emoji-select" data-emoji="&#x1F937;">&#x1F937;</span> <!-- 🤷 -->
+                <span class="emoji-select" data-emoji="&#x1F938;">&#x1F938;</span> <!-- 🤸 -->
+                <span class="emoji-select" data-emoji="&#x1F939;">&#x1F939;</span> <!-- 🤹 -->
+                <span class="emoji-select" data-emoji="&#x1F93A;">&#x1F93A;</span> <!-- 🤺 -->
+                <span class="emoji-select" data-emoji="&#x1F93B;">&#x1F93B;</span> <!-- 🤻 -->
+                <span class="emoji-select" data-emoji="&#x1F93C;">&#x1F93C;</span> <!-- 🤼 -->
+                <span class="emoji-select" data-emoji="&#x1F93D;">&#x1F93D;</span> <!-- 🤽 -->
+                <span class="emoji-select" data-emoji="&#x1F93E;">&#x1F93E;</span> <!-- 🤾 -->
+                <span class="emoji-select" data-emoji="&#x1F93F;">&#x1F93F;</span> <!-- 🤿 -->
+                <span class="emoji-select" data-emoji="&#x1F940;">&#x1F940;</span> <!-- 🥀 -->
+                <span class="emoji-select" data-emoji="&#x1F941;">&#x1F941;</span> <!-- 🥁 -->             
+              </ul>
+            </div>
+            <input class="form-control" placeholder="Escribe tu mensaje..." id="my_input" type="text" required style="margin-right: 5px;" autocomplete="off">
+            <input class="btn btn-success" id="submit_button" type="button" value="Enviar" style="margin-right: 5px;">
+          </div>          
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+{{ slug|json_script:"room_slug" }}
+<script>
+  const chatbox = document.querySelector("#chatbox");
+  let messagesList = JSON.parse(localStorage.getItem("chatMessages")) || []; // Obtener mensajes almacenados en el almacenamiento local
+
+  // Function to scroll to the bottom of the chatbox
+  function scrollToBottom() {
+    chatbox.scrollTop = chatbox.scrollHeight;
+  }
+
+  function updateChatbox() {
+    chatbox.innerHTML = "";
+
+    messagesList.forEach(function (message) {
+        var div = document.createElement("div");
+        var timestamp = new Date(message.timestamp);
+        var formattedTimestamp = timestamp.toLocaleString();  // Utiliza toLocaleString() para mostrar la fecha y la hora
+
+// Verifica si el mensaje es un evento de chat
+if (message.type === "chat.event") {
+  // Crea el mensaje de evento de chat
+  div.innerHTML = "<div class='chat-event'>" + message.message + "</div>";
+} else if (message.type === "join") {
+  // Crea el mensaje de unión al chat
+  var messageDiv = document.createElement("div");
+  messageDiv.textContent = message.message;
+  messageDiv.classList.add("chat-message", "text-center", "union");
+  div.appendChild(messageDiv);
+} else if (message.type === "leave") {
+  // Crea el mensaje de salida del chat
+  var messageDiv = document.createElement("div");
+  messageDiv.textContent = message.message;
+  messageDiv.classList.add("chat-message", "text-center", "salida");
+  div.appendChild(messageDiv);
+} else {
+  // Crea el mensaje de chat normal
+  var messageDiv = document.createElement("div");
+  messageDiv.textContent = message.username + " (" + formattedTimestamp + "): " + message.message;
+  messageDiv.classList.add("chat-message");
+  if (message.username === "{{ request.user.username }}") {
+    messageDiv.classList.add("text-right");
+  } else {
+    messageDiv.classList.add("text-left");
+  }
+  div.appendChild(messageDiv);
+}
+
+
+        chatbox.appendChild(div);
+    });
+
+    scrollToBottom();
+}
+
+
+  updateChatbox(); // Update chatbox on page load
+
+  const roomName = JSON.parse(document.getElementById('room_slug').textContent);
+  const chatSocket = new WebSocket("ws://" + window.location.host + "/ws/" + roomName + "/");
+
+  chatSocket.onopen = function (e) {
+    const notification = document.getElementById('notification');
+    notification.textContent = '¡Te has unido al chat!';
+    notification.style.display = 'block';
+    setTimeout(() => {
+      notification.style.display = 'none';
+    }, 3000); // Oculta la notificación después de 3 segundos
+  };
+
+  chatSocket.onclose = function (e) {
+    console.log("Something unexpected happened !");
+  };
+
+  document.querySelector("#my_input").focus();
+  document.querySelector("#my_input").onkeyup = function (e) {
+    if (e.keyCode == 13) {
+      e.preventDefault();
+      document.querySelector("#submit_button").click();
+    }
+  };
+
+  document.querySelector("#submit_button").onclick = function (e) {
+    var messageInput = document.querySelector("#my_input").value;
+
+    if (messageInput.length == 0) {
+      alert("¡No has escrito ningún mensaje!")
+    } else {
+      const timestamp = new Date().toISOString();
+      const localTime = new Date().toLocaleTimeString();
+      const messageData = {
+        message: messageInput,
+        username: "{{ request.user.username }}",
+        room_name: "{{ room_name }}",
+        timestamp: timestamp,
+        local_time: localTime
+      };
+
+      chatSocket.send(JSON.stringify(messageData));
+
+      // Clear input field after sending message
+      document.querySelector("#my_input").value = "";
+    }
+  };
+
+  chatSocket.onmessage = function (e) {
+    const data = JSON.parse(e.data);
+    if (data.type === "chat.event") {
+        // Si es un mensaje de evento de chat, actualiza la interfaz de usuario con el mensaje
+        const message = data.message;
+        console.log(message);
+        // Muestra una notificación emergente para los eventos de entrada y salida
+        window.alert(message);
+    } else {
+        // Si no es un mensaje de evento de chat, es un mensaje de chat normal
+        // Agrega el mensaje a la lista de mensajes y actualiza la caja de chat
+        messagesList.push(data);
+        localStorage.setItem("chatMessages", JSON.stringify(messagesList)); // Almacena los mensajes en localStorage
+        updateChatbox(); // Actualiza la caja de chat con el nuevo mensaje
+    }
+};
+
+
+function getCookie(name) {
+  var cookieValue = null;
+  if (document.cookie && document.cookie !== '') {
+      var cookies = document.cookie.split(';');
+      for (var i = 0; i < cookies.length; i++) {
+          var cookie = cookies[i].trim();
+          // Buscar el nombre de la cookie
+          if (cookie.substring(0, name.length + 1) === (name + '=')) {
+              cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+              break;
+          }
+      }
+  }
+  return cookieValue;
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  // Obtener todos los elementos con la clase 'emoji-select'
+  var emojiSelects = document.querySelectorAll('.emoji-select');
+
+  // Agregar un evento 'click' a cada emoji
+  emojiSelects.forEach(function(emojiSelect) {
+    emojiSelect.addEventListener('click', function() {
+      // Obtener el valor del emoji
+      var emojiValue = this.getAttribute('data-emoji');
+      
+      // Insertar el emoji en el campo de entrada de texto
+      var inputField = document.querySelector('#my_input');
+      inputField.value += emojiValue;
+    });
+  });
+});
+
+</script>
+
+
+
+{% else %}
+<div class="container">
+  <div class="alert alert-info d-flex justify-content-between" role="alert">
+    <h5>You are not logged in</h5>
+    <a href="/accounts/logout/">
+      <button type="button" class="btn btn-light"><a href="{% url 'login' %}">Log In</a></button>
+    </a>
+  </div>
+</div>
+{% endif %}
+
+<br/>
+{% endblock %}

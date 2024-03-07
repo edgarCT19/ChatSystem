@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block title %}Home{% endblock %}
+
+{% block content %}
+{% if user.is_authenticated %}
+<div class="container">
+  <h3 class="mt-5 mb-4 bg-info text-white p-3 justify-content-between">Hi, {{ user.username }}!</h3>
+  <form action="{% url 'logout' %}" method="post">
+    {% csrf_token %}
+    <button type="submit" class="btn btn-danger mb-4">Salir <i class="bi bi-box-arrow-left"></i></button>
+
+    <div class="row">
+      {% for i in rooms %}
+      <div class="col-md-4 mb-4">
+        <div class="card">
+          <div class="card-body">
+            <h5 class="card-title">{{ i.name }}</h5>
+            <p class="card-text">Ingresa a un nuevo chat, y disfruta de la comunicación con tus seres queridos.</p>
+           <a href="{{ i.slug }}" class="btn btn-success join-chat-button" data-room-id="{{ i.id }}">Entrar <i class="bi bi-arrow-right-circle"></i></a>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </form>
+  
+</div>
+<!-- Alerta emergente -->
+<div class="alert alert-success alert-dismissible fade" id="joinAlert" role="alert">
+  <strong>¡Nuevo usuario se ha unido al chat!</strong>
+  <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+</div>
+{% else %}
+<div class="container">
+  <p class="mt-5 mb-4">You are not logged in</p>
+  <a href="{% url 'login' %}" class="btn btn-primary">Log In</a>
+</div>
+{% endif %}
+
+
+{% endblock %}
